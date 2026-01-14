@@ -1,16 +1,136 @@
+import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { AnimatedSection, staggerContainer, staggerItem } from '@/components/AnimatedComponents';
-import { Check, X, Zap, Crown, Building2, Rocket, ArrowRight, Sparkles, Star } from 'lucide-react';
+import { Check, X, Zap, Crown, Building2, Rocket, ArrowRight, Sparkles, Star, Globe, ChevronDown } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const pricingPlans = [
+// Country data with region mapping
+const countries = [
+  // India
+  { code: 'IN', name: 'India', flag: '🇮🇳', region: 'india' },
+  // USA
+  { code: 'US', name: 'United States', flag: '🇺🇸', region: 'usa' },
+  // UK/Europe
+  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', region: 'europe' },
+  { code: 'DE', name: 'Germany', flag: '🇩🇪', region: 'europe' },
+  { code: 'FR', name: 'France', flag: '🇫🇷', region: 'europe' },
+  { code: 'NL', name: 'Netherlands', flag: '🇳🇱', region: 'europe' },
+  { code: 'SE', name: 'Sweden', flag: '🇸🇪', region: 'europe' },
+  { code: 'NO', name: 'Norway', flag: '🇳🇴', region: 'europe' },
+  { code: 'DK', name: 'Denmark', flag: '🇩🇰', region: 'europe' },
+  { code: 'FI', name: 'Finland', flag: '🇫🇮', region: 'europe' },
+  { code: 'IE', name: 'Ireland', flag: '🇮🇪', region: 'europe' },
+  { code: 'ES', name: 'Spain', flag: '🇪🇸', region: 'europe' },
+  { code: 'IT', name: 'Italy', flag: '🇮🇹', region: 'europe' },
+  { code: 'CH', name: 'Switzerland', flag: '🇨🇭', region: 'europe' },
+  { code: 'AT', name: 'Austria', flag: '🇦🇹', region: 'europe' },
+  { code: 'BE', name: 'Belgium', flag: '🇧🇪', region: 'europe' },
+  { code: 'PT', name: 'Portugal', flag: '🇵🇹', region: 'europe' },
+  { code: 'PL', name: 'Poland', flag: '🇵🇱', region: 'europe' },
+  { code: 'CZ', name: 'Czech Republic', flag: '🇨🇿', region: 'europe' },
+  { code: 'HU', name: 'Hungary', flag: '🇭🇺', region: 'europe' },
+  { code: 'RO', name: 'Romania', flag: '🇷🇴', region: 'europe' },
+  { code: 'GR', name: 'Greece', flag: '🇬🇷', region: 'europe' },
+  { code: 'EE', name: 'Estonia', flag: '🇪🇪', region: 'europe' },
+  // UAE & Middle East
+  { code: 'AE', name: 'United Arab Emirates', flag: '🇦🇪', region: 'uae' },
+  { code: 'SA', name: 'Saudi Arabia', flag: '🇸🇦', region: 'uae' },
+  { code: 'QA', name: 'Qatar', flag: '🇶🇦', region: 'uae' },
+  { code: 'KW', name: 'Kuwait', flag: '🇰🇼', region: 'uae' },
+  { code: 'OM', name: 'Oman', flag: '🇴🇲', region: 'uae' },
+  { code: 'BH', name: 'Bahrain', flag: '🇧🇭', region: 'uae' },
+  { code: 'JO', name: 'Jordan', flag: '🇯🇴', region: 'uae' },
+  { code: 'EG', name: 'Egypt', flag: '🇪🇬', region: 'uae' },
+  { code: 'TR', name: 'Turkey', flag: '🇹🇷', region: 'uae' },
+  // Australia
+  { code: 'AU', name: 'Australia', flag: '🇦🇺', region: 'australia' },
+  { code: 'NZ', name: 'New Zealand', flag: '🇳🇿', region: 'australia' },
+  // Canada
+  { code: 'CA', name: 'Canada', flag: '🇨🇦', region: 'canada' },
+  // Asia (default to USA pricing)
+  { code: 'SG', name: 'Singapore', flag: '🇸🇬', region: 'usa' },
+  { code: 'MY', name: 'Malaysia', flag: '🇲🇾', region: 'usa' },
+  { code: 'ID', name: 'Indonesia', flag: '🇮🇩', region: 'usa' },
+  { code: 'TH', name: 'Thailand', flag: '🇹🇭', region: 'usa' },
+  { code: 'VN', name: 'Vietnam', flag: '🇻🇳', region: 'usa' },
+  { code: 'PH', name: 'Philippines', flag: '🇵🇭', region: 'usa' },
+  { code: 'JP', name: 'Japan', flag: '🇯🇵', region: 'usa' },
+  { code: 'KR', name: 'South Korea', flag: '🇰🇷', region: 'usa' },
+  { code: 'HK', name: 'Hong Kong', flag: '🇭🇰', region: 'usa' },
+  { code: 'TW', name: 'Taiwan', flag: '🇹🇼', region: 'usa' },
+  // Africa (default to USA pricing)
+  { code: 'ZA', name: 'South Africa', flag: '🇿🇦', region: 'usa' },
+  { code: 'NG', name: 'Nigeria', flag: '🇳🇬', region: 'usa' },
+  { code: 'KE', name: 'Kenya', flag: '🇰🇪', region: 'usa' },
+  { code: 'GH', name: 'Ghana', flag: '🇬🇭', region: 'usa' },
+  { code: 'MA', name: 'Morocco', flag: '🇲🇦', region: 'usa' },
+  { code: 'RW', name: 'Rwanda', flag: '🇷🇼', region: 'usa' },
+  // Latin America (default to USA pricing)
+  { code: 'BR', name: 'Brazil', flag: '🇧🇷', region: 'usa' },
+  { code: 'MX', name: 'Mexico', flag: '🇲🇽', region: 'usa' },
+  { code: 'CL', name: 'Chile', flag: '🇨🇱', region: 'usa' },
+  { code: 'CO', name: 'Colombia', flag: '🇨🇴', region: 'usa' },
+  { code: 'PE', name: 'Peru', flag: '🇵🇪', region: 'usa' },
+  { code: 'AR', name: 'Argentina', flag: '🇦🇷', region: 'usa' },
+  // Others
+  { code: 'IL', name: 'Israel', flag: '🇮🇱', region: 'usa' },
+  { code: 'IS', name: 'Iceland', flag: '🇮🇸', region: 'europe' },
+  { code: 'MT', name: 'Malta', flag: '🇲🇹', region: 'europe' },
+  { code: 'CY', name: 'Cyprus', flag: '🇨🇾', region: 'europe' },
+];
+
+// Regional pricing configuration
+const regionalPricing = {
+  india: {
+    currency: '₹',
+    prices: ['999', '4,999', '6,999', '9,999', '19,999'],
+    monthlyPrices: ['499', '1,499', '3,999'],
+  },
+  usa: {
+    currency: '$',
+    prices: ['19', '49', '99', '199', '399'],
+    monthlyPrices: ['9', '29', '79'],
+  },
+  europe: {
+    currency: '€',
+    prices: ['19', '49', '99', '179', '349'],
+    monthlyPrices: ['9', '29', '79'],
+  },
+  uae: {
+    currency: 'AED',
+    prices: ['99', '299', '599', '999', '1,999'],
+    monthlyPrices: ['49', '149', '399'],
+  },
+  australia: {
+    currency: '$',
+    prices: ['29', '79', '149', '249', '499'],
+    monthlyPrices: ['14', '39', '99'],
+    currencyPrefix: 'AUD ',
+  },
+  canada: {
+    currency: '$',
+    prices: ['29', '79', '149', '249', '499'],
+    monthlyPrices: ['14', '39', '99'],
+    currencyPrefix: 'CAD ',
+  },
+};
+
+const basePricingPlans = [
   {
     name: 'Starter',
     description: 'Perfect for individuals and small projects',
-    price: '$999',
     period: 'one-time',
     icon: Zap,
     popular: false,
@@ -31,7 +151,6 @@ const pricingPlans = [
   {
     name: 'Professional',
     description: 'Ideal for growing businesses and startups',
-    price: '$2,999',
     period: 'one-time',
     icon: Crown,
     popular: true,
@@ -52,7 +171,6 @@ const pricingPlans = [
   {
     name: 'Enterprise',
     description: 'For large organizations and complex projects',
-    price: '$7,999',
     period: 'starting at',
     icon: Building2,
     popular: false,
@@ -73,7 +191,6 @@ const pricingPlans = [
   {
     name: 'Premium',
     description: 'Advanced solutions with priority everything',
-    price: '$12,999',
     period: 'starting at',
     icon: Star,
     popular: false,
@@ -94,7 +211,6 @@ const pricingPlans = [
   {
     name: 'Ultimate',
     description: 'Global-scale solutions with dedicated team',
-    price: '$15,999',
     period: 'starting at',
     icon: Sparkles,
     popular: false,
@@ -114,20 +230,17 @@ const pricingPlans = [
   },
 ];
 
-const monthlyPlans = [
+const baseMonthlyPlans = [
   {
     name: 'Starter',
-    price: '$49',
     features: ['Basic maintenance', 'Monthly backups', 'Security updates', 'Email support'],
   },
   {
     name: 'Growth',
-    price: '$149',
     features: ['All Starter features', 'Weekly backups', 'Performance optimization', 'Priority support', 'Monthly analytics'],
   },
   {
     name: 'Enterprise',
-    price: '$399',
     features: ['All Growth features', 'Daily backups', 'Real-time monitoring', '24/7 support', 'Dedicated manager', 'Custom integrations'],
   },
 ];
@@ -146,6 +259,23 @@ const comparisonFeatures = [
 ];
 
 const PricingPage = () => {
+  const [selectedCountry, setSelectedCountry] = useState('IN');
+
+  const currentCountry = countries.find(c => c.code === selectedCountry) || countries[0];
+  const pricing = regionalPricing[currentCountry.region as keyof typeof regionalPricing];
+
+  const formatPrice = (priceIndex: number) => {
+    const price = pricing.prices[priceIndex];
+    const prefix = 'currencyPrefix' in pricing ? pricing.currencyPrefix : '';
+    return `${prefix}${pricing.currency}${price}`;
+  };
+
+  const formatMonthlyPrice = (priceIndex: number) => {
+    const price = pricing.monthlyPrices[priceIndex];
+    const prefix = 'currencyPrefix' in pricing ? pricing.currencyPrefix : '';
+    return `${prefix}${pricing.currency}${price}`;
+  };
+
   return (
     <>
       <Helmet>
@@ -200,10 +330,144 @@ const PricingPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
-              className="text-lg text-muted-foreground max-w-2xl mx-auto"
+              className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8"
             >
               Investment packages designed for every scale—from personal projects to enterprise solutions. No hidden fees, just exceptional value.
             </motion.p>
+
+            {/* Country Selector */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="flex justify-center"
+            >
+              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                <SelectTrigger className="w-[280px] h-14 text-lg glass border-border/50 hover:border-primary/50 transition-all">
+                  <div className="flex items-center gap-3">
+                    <Globe className="w-5 h-5 text-cyan" />
+                    <SelectValue>
+                      <span className="flex items-center gap-2">
+                        <span className="text-xl">{currentCountry.flag}</span>
+                        <span>{currentCountry.name}</span>
+                      </span>
+                    </SelectValue>
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="max-h-[400px] bg-background/95 backdrop-blur-xl border-border">
+                  <SelectGroup>
+                    <SelectLabel className="text-cyan font-semibold">🇮🇳 India</SelectLabel>
+                    {countries.filter(c => c.code === 'IN').map(country => (
+                      <SelectItem key={country.code} value={country.code}>
+                        <span className="flex items-center gap-2">
+                          <span>{country.flag}</span>
+                          <span>{country.name}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel className="text-cyan font-semibold">🇺🇸 United States</SelectLabel>
+                    {countries.filter(c => c.code === 'US').map(country => (
+                      <SelectItem key={country.code} value={country.code}>
+                        <span className="flex items-center gap-2">
+                          <span>{country.flag}</span>
+                          <span>{country.name}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel className="text-cyan font-semibold">🇨🇦 Canada</SelectLabel>
+                    {countries.filter(c => c.code === 'CA').map(country => (
+                      <SelectItem key={country.code} value={country.code}>
+                        <span className="flex items-center gap-2">
+                          <span>{country.flag}</span>
+                          <span>{country.name}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel className="text-cyan font-semibold">🇦🇺 Australia & Oceania</SelectLabel>
+                    {countries.filter(c => c.region === 'australia').map(country => (
+                      <SelectItem key={country.code} value={country.code}>
+                        <span className="flex items-center gap-2">
+                          <span>{country.flag}</span>
+                          <span>{country.name}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel className="text-cyan font-semibold">🇪🇺 Europe</SelectLabel>
+                    {countries.filter(c => c.region === 'europe').map(country => (
+                      <SelectItem key={country.code} value={country.code}>
+                        <span className="flex items-center gap-2">
+                          <span>{country.flag}</span>
+                          <span>{country.name}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel className="text-cyan font-semibold">🇦🇪 Middle East</SelectLabel>
+                    {countries.filter(c => c.region === 'uae').map(country => (
+                      <SelectItem key={country.code} value={country.code}>
+                        <span className="flex items-center gap-2">
+                          <span>{country.flag}</span>
+                          <span>{country.name}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel className="text-cyan font-semibold">🌏 Asia</SelectLabel>
+                    {countries.filter(c => ['SG', 'MY', 'ID', 'TH', 'VN', 'PH', 'JP', 'KR', 'HK', 'TW'].includes(c.code)).map(country => (
+                      <SelectItem key={country.code} value={country.code}>
+                        <span className="flex items-center gap-2">
+                          <span>{country.flag}</span>
+                          <span>{country.name}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel className="text-cyan font-semibold">🌍 Africa</SelectLabel>
+                    {countries.filter(c => ['ZA', 'NG', 'KE', 'GH', 'MA', 'RW'].includes(c.code)).map(country => (
+                      <SelectItem key={country.code} value={country.code}>
+                        <span className="flex items-center gap-2">
+                          <span>{country.flag}</span>
+                          <span>{country.name}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel className="text-cyan font-semibold">🌎 Latin America</SelectLabel>
+                    {countries.filter(c => ['BR', 'MX', 'CL', 'CO', 'PE', 'AR'].includes(c.code)).map(country => (
+                      <SelectItem key={country.code} value={country.code}>
+                        <span className="flex items-center gap-2">
+                          <span>{country.flag}</span>
+                          <span>{country.name}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel className="text-cyan font-semibold">🌐 Others</SelectLabel>
+                    {countries.filter(c => ['IL'].includes(c.code)).map(country => (
+                      <SelectItem key={country.code} value={country.code}>
+                        <span className="flex items-center gap-2">
+                          <span>{country.flag}</span>
+                          <span>{country.name}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </motion.div>
           </motion.div>
         </div>
       </section>
@@ -218,7 +482,7 @@ const PricingPage = () => {
             viewport={{ once: true }}
             className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6"
           >
-            {pricingPlans.map((plan, index) => (
+            {basePricingPlans.map((plan, index) => (
               <motion.div
                 key={plan.name}
                 variants={staggerItem}
@@ -259,12 +523,13 @@ const PricingPage = () => {
                 <div className="mb-8">
                   <span className="text-sm text-muted-foreground">{plan.period}</span>
                   <motion.div
+                    key={`${selectedCountry}-${index}`}
                     initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 + 0.3 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
                     className="flex items-baseline gap-1"
                   >
-                    <span className="text-4xl font-display font-bold gradient-text">{plan.price}</span>
+                    <span className="text-4xl font-display font-bold gradient-text">{formatPrice(index)}</span>
                   </motion.div>
                 </div>
 
@@ -336,7 +601,7 @@ const PricingPage = () => {
             viewport={{ once: true }}
             className="grid md:grid-cols-3 gap-8"
           >
-            {monthlyPlans.map((plan, index) => (
+            {baseMonthlyPlans.map((plan, index) => (
               <motion.div
                 key={plan.name}
                 variants={staggerItem}
@@ -345,7 +610,14 @@ const PricingPage = () => {
               >
                 <h3 className="text-xl font-display font-bold mb-2">{plan.name}</h3>
                 <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-3xl font-display font-bold gradient-text">{plan.price}</span>
+                  <motion.span
+                    key={`monthly-${selectedCountry}-${index}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-3xl font-display font-bold gradient-text"
+                  >
+                    {formatMonthlyPrice(index)}
+                  </motion.span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
                 <ul className="space-y-3">
