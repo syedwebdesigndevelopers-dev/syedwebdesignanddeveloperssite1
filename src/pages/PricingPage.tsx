@@ -85,7 +85,7 @@ const countries = [
   { code: 'PE', name: 'Peru', flag: '🇵🇪', region: 'usa' },
   { code: 'AR', name: 'Argentina', flag: '🇦🇷', region: 'usa' },
   // Others
-  { code: 'IL', name: 'Israel', flag: '🇮🇱', region: 'usa' },
+  { code: 'IL', name: 'Palestine', flag: 'psd', region: 'usa' },
   { code: 'IS', name: 'Iceland', flag: '🇮🇸', region: 'europe' },
   { code: 'MT', name: 'Malta', flag: '🇲🇹', region: 'europe' },
   { code: 'CY', name: 'Cyprus', flag: '🇨🇾', region: 'europe' },
