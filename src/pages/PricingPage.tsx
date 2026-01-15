@@ -151,7 +151,7 @@ const basePricingPlans = [
   {
     name: 'Professional',
     description: 'Ideal for growing businesses and startups',
-    period: 'Per-Month',
+    period: '',
     icon: Crown,
     popular: true,
     features: [
