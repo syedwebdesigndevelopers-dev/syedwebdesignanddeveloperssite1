@@ -131,7 +131,7 @@ const basePricingPlans = [
   {
     name: 'Starter',
     description: 'Perfect for individuals and small projects',
-    period: 'one-time',
+    period: 'Per-Month',
     icon: Zap,
     popular: false,
     features: [
@@ -151,7 +151,7 @@ const basePricingPlans = [
   {
     name: 'Professional',
     description: 'Ideal for growing businesses and startups',
-    period: 'one-time',
+    period: 'Per-Month',
     icon: Crown,
     popular: true,
     features: [
